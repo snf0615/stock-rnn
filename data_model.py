@@ -38,17 +38,19 @@ class StockDataSet(object):
             self.stock_sym, len(self.train_X), len(self.test_y))
 
     def _prepare_data(self, seq):
-        # split into items of window_size
+        # split seq into sliding windows
         num_windows = len(seq) // self.window_size
         seq = [np.array(seq[i * self.window_size: (i + 1) * self.window_size])
                for i in range(num_windows)]
         if self.normalized:
             seq = [seq[0] / seq[0][0] - 1.0] + [
                 curr / seq[i][-1] - 1.0 for i, curr in enumerate(seq[1:])]
+            # [seq[0] / seq[0][0] - 1.0] for first window
+            # [curr / seq[i][-1] - 1.0 for i, curr in enumerate(seq[1:])] other windows, divided by last price of last window
 
-        # split into groups of num_steps
-        X = np.array([seq[i: i + self.num_steps] for i in range(len(seq) - self.num_steps)])
-        y = np.array([seq[i + self.num_steps] for i in range(len(seq) - self.num_steps)])
+        # split into groups of num_windows_input (the number of windows grouped in each input and each output)
+        X = np.array([seq[i: i + self.num_windows_input] for i in range(len(seq) - self.num_windows_input)]) 
+        y = np.array([seq[i + self.num_windows_input] for i in range(len(seq) - self.num_windows_input)])
 
         train_size = int(len(X) * (1.0 - self.test_percent))
         train_X, test_X = X[:train_size], X[train_size:]
