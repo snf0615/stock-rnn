@@ -16,7 +16,7 @@ class StockDataSet(object):
                  close_price_only=True):
         self.stock_sym = stock_sym
         self.window_size = window_size
-        self.num_steps = num_steps
+        self.num_windows_input = num_windows_input
         self.test_percent = test_percent
         self.close_price_only = close_price_only
         self.normalized = normalized
