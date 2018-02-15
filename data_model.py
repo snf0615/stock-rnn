@@ -6,19 +6,18 @@ import time
 
 random.seed(time.time())
 
-#test_ratio:split train and test
 class StockDataSet(object):
     def __init__(self,
                  stock_sym,
                  input_size=1,
                  num_steps=30,
-                 test_ratio=0.1,
+                 test_percent=0.1,
                  normalized=True,
                  close_price_only=True):
         self.stock_sym = stock_sym
-        self.input_size = input_size
+        self.window_size = window_size
         self.num_steps = num_steps
-        self.test_ratio = test_ratio
+        self.test_percent = test_percent
         self.close_price_only = close_price_only
         self.normalized = normalized
 
@@ -39,9 +38,10 @@ class StockDataSet(object):
             self.stock_sym, len(self.train_X), len(self.test_y))
 
     def _prepare_data(self, seq):
-        # split into items of input_size
-        seq = [np.array(seq[i * self.input_size: (i + 1) * self.input_size])
-               for i in range(len(seq) // self.input_size)]
+        # split into items of window_size
+        num_windows = len(seq) // self.window_size
+        seq = [np.array(seq[i * self.window_size: (i + 1) * self.window_size])
+               for i in range(num_windows)]
         if self.normalized:
             seq = [seq[0] / seq[0][0] - 1.0] + [
                 curr / seq[i][-1] - 1.0 for i, curr in enumerate(seq[1:])]
@@ -50,7 +50,7 @@ class StockDataSet(object):
         X = np.array([seq[i: i + self.num_steps] for i in range(len(seq) - self.num_steps)])
         y = np.array([seq[i + self.num_steps] for i in range(len(seq) - self.num_steps)])
 
-        train_size = int(len(X) * (1.0 - self.test_ratio))
+        train_size = int(len(X) * (1.0 - self.test_percent))
         train_X, test_X = X[:train_size], X[train_size:]
         train_y, test_y = y[:train_size], y[train_size:]
         return train_X, train_y, test_X, test_y
