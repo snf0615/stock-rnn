@@ -48,7 +48,7 @@ class StockDataSet(object):
             # [seq[0] / seq[0][0] - 1.0] for first window
             # [curr / seq[i][-1] - 1.0 for i, curr in enumerate(seq[1:])] other windows, divided by last price of last window
 
-        # split into groups of num_windows_input (the number of windows grouped in each input and each output)
+        # split into groups of num_windows_input (the number of windows grouped in input for each computation step)
         X = np.array([seq[i: i + self.num_windows_input] for i in range(len(seq) - self.num_windows_input)]) 
         y = np.array([seq[i + self.num_windows_input] for i in range(len(seq) - self.num_windows_input)])
 
