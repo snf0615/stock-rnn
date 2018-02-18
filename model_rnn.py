@@ -66,7 +66,7 @@ class LstmRNN(object):
         self.targets = tf.placeholder(tf.float32, [None, self.input_size], name="targets")
 
         def _create_one_cell():
-            # lstm_size = hidden dimension size = # of units in a lstm cell
+            # lstm_size = hidden dimension size = # of units in a lstm cell, parameter to estimate
             # Output and state vectors size: batch_size * num_steps * lstm_size
             lstm_cell = tf.contrib.rnn.LSTMCell(self.lstm_size, state_is_tuple=True)
             if self.keep_prob < 1.0:
@@ -88,7 +88,7 @@ class LstmRNN(object):
         # After transpose, val.get_shape() = (num_steps, batch_size, lstm_size)
         val = tf.transpose(val, [1, 0, 2])
 
-        # We only interested in the last value of output.
+        # We only interested in the value of outputs at the last time step.
         last = tf.gather(val, int(val.get_shape()[0]) - 1, name="lstm_state")
         ws = tf.Variable(tf.truncated_normal([self.lstm_size, self.input_size]), name="w")
         bias = tf.Variable(tf.constant(0.1, shape=[self.input_size]), name="b")
@@ -99,7 +99,6 @@ class LstmRNN(object):
         self.b_sum = tf.summary.histogram("b", bias)
         self.pred_summ = tf.summary.histogram("pred", self.pred)
 
-        # self.loss = -tf.reduce_sum(targets * tf.log(tf.clip_by_value(prediction, 1e-10, 1.0)))
         self.loss = tf.reduce_mean(tf.square(self.pred - self.targets), name="loss_mse")
         self.optim = tf.train.RMSPropOptimizer(self.learning_rate).minimize(self.loss, name="rmsprop_optim")
 
