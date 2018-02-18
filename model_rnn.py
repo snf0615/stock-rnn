@@ -67,6 +67,7 @@ class LstmRNN(object):
 
         def _create_one_cell():
             lstm_cell = tf.contrib.rnn.LSTMCell(self.lstm_size, state_is_tuple=True)
+            # lstm_size, # of units in each hidden layer
             if self.keep_prob < 1.0:
                 lstm_cell = tf.contrib.rnn.DropoutWrapper(lstm_cell, output_keep_prob=self.keep_prob)
             return lstm_cell
