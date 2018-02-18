@@ -67,7 +67,7 @@ class LstmRNN(object):
 
         def _create_one_cell():
             lstm_cell = tf.contrib.rnn.LSTMCell(self.lstm_size, state_is_tuple=True)
-            # lstm_size, # of units in hidden dimension of a lstm cell.
+            # lstm_size, # of units in hidden dimension of a lstm cell, also size of output and state vectors
             if self.keep_prob < 1.0:
                 lstm_cell = tf.contrib.rnn.DropoutWrapper(lstm_cell, output_keep_prob=self.keep_prob)
                 # In RNN, dropout between layers not time series, here between hidden and output layer.
