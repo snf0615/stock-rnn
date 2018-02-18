@@ -66,11 +66,12 @@ class LstmRNN(object):
         self.targets = tf.placeholder(tf.float32, [None, self.input_size], name="targets")
 
         def _create_one_cell():
+            # lstm_size = hidden dimension size = # of units in a lstm cell
+            # Output and state vectors size: batch_size * num_steps * lstm_size
             lstm_cell = tf.contrib.rnn.LSTMCell(self.lstm_size, state_is_tuple=True)
-            # lstm_size, # of units in hidden dimension of a lstm cell, also size of output and state vectors
             if self.keep_prob < 1.0:
-                lstm_cell = tf.contrib.rnn.DropoutWrapper(lstm_cell, output_keep_prob=self.keep_prob)
                 # In RNN, dropout between layers not time series, here between hidden and output layer.
+                lstm_cell = tf.contrib.rnn.DropoutWrapper(lstm_cell, output_keep_prob=self.keep_prob)
             return lstm_cell
 
         cell = tf.contrib.rnn.MultiRNNCell(
@@ -79,13 +80,15 @@ class LstmRNN(object):
         ) if self.num_layers > 1 else _create_one_cell()
 
 
-        # Run dynamic RNN
+        # How we store the result of execution of dynamic RNN
+        # In stead of dynamic_rnn we can also use a loop (for timestep in range(num_steps))
         val, state_ = tf.nn.dynamic_rnn(cell, self.inputs, dtype=tf.float32, scope="dynamic_rnn")
 
         # Before transpose, val.get_shape() = (batch_size, num_steps, lstm_size)
         # After transpose, val.get_shape() = (num_steps, batch_size, lstm_size)
         val = tf.transpose(val, [1, 0, 2])
 
+        # We only interested in the last value of output
         last = tf.gather(val, int(val.get_shape()[0]) - 1, name="lstm_state")
         ws = tf.Variable(tf.truncated_normal([self.lstm_size, self.input_size]), name="w")
         bias = tf.Variable(tf.constant(0.1, shape=[self.input_size]), name="b")
