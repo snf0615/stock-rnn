@@ -56,12 +56,12 @@ class LstmRNN(object):
         - targets: training label y
         - learning_rate:
         """
-        # inputs.shape = (number of examples, number of input, dimension of each input).
+        
         self.learning_rate = tf.placeholder(tf.float32, None, name="learning_rate")
 
         # Stock symbols are mapped to integers.
         self.symbols = tf.placeholder(tf.int32, [None, 1], name='stock_labels')
-
+        # Inputs size: batch_size (sample numbers) * num_steps (time steps) * input_size (input dimension for each time step of each sample)
         self.inputs = tf.placeholder(tf.float32, [None, self.num_steps, self.input_size], name="inputs")
         self.targets = tf.placeholder(tf.float32, [None, self.input_size], name="targets")
 
@@ -88,7 +88,7 @@ class LstmRNN(object):
         # After transpose, val.get_shape() = (num_steps, batch_size, lstm_size)
         val = tf.transpose(val, [1, 0, 2])
 
-        # We only interested in the last value of output
+        # We only interested in the last value of output.
         last = tf.gather(val, int(val.get_shape()[0]) - 1, name="lstm_state")
         ws = tf.Variable(tf.truncated_normal([self.lstm_size, self.input_size]), name="w")
         bias = tf.Variable(tf.constant(0.1, shape=[self.input_size]), name="b")
